@@ -66,22 +66,14 @@ def run_all():
         qA_local = convert_mm_day_to_m3_s(runoff_mm_A, A_area)
         qB_local = convert_mm_day_to_m3_s(runoff_mm_B, B_area)
 
-        # Reach A total discharge (no routing)
-        qA = qA_local + last_qA * 0.0  # pointless last_qA (dead state) # BUG
-
         # Mix tracer in A: upstream boundary and local input
         concentration_A = mix_concentration(q1=1.0, c1=upstream_c, q2=qA_local, c2=concentration_A)
-
-        results.append({"date": d.isoformat(), "reach": "A", "q_m3s": qA, "c_mgL": concentration_A})
+        results.append({"date": date, "reach": "A", "q_m3s": qA_local, "c_mgL": concentration_A})
 
         # Reach B receives Q from A and its own local input
-        qB = qB_local + qA
-
-        concentration_B = mix_concentration(q1=qA, c1=concentration_A, q2=qB_local, c2=concentration_B)
-
-        results.append({"date": d.isoformat(), "reach": "B", "q_m3s": qB, "c_mgL": concentration_B})
-
-        last_qA = qA
+        qB_total = qB_local + qA_local
+        concentration_B = mix_concentration(q1=qA_local, c1=concentration_A, q2=qB_local, c2=concentration_B)
+        results.append({"date": date, "reach": "B", "q_m3s": qB_total, "c_mgL": concentration_B})
 
     return results
 
