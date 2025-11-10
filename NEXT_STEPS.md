@@ -15,8 +15,6 @@ Template
   - figure out how beta comes into the equation (removed for now)
   - for date parser, add an input argument to allow different date formats, rather than forcing a single one and returning error.
   - diagnose whether AI split the `run_all` function up too much into separate modules.
-  - add more tests, currently a large part of the code base is still untested
-  - fix type checking errors
 - Risks/assumptions:
   - ...
 - Notes for reviewers:
