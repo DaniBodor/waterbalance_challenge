@@ -1,0 +1,30 @@
+[project]
+name = "waterbalance-challenge"
+version = "0.1.0"
+description = ""
+authors = [{ name = "DaniBodor", email = "tatu.dani@gmail.com" }]
+license = { text = "Apache2" }
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[tool.poetry]
+packages = [{ include = "legacy_code" }] # AI-ASSIST
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.0.0,<10.0.0)",
+    "ruff (>=0.14.4,<0.15.0)",
+    "mypy (>=1.18.2,<2.0.0)",
+    "black (>=25.11.0,<26.0.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+output-format = "concise"
