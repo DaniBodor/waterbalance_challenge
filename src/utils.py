@@ -5,10 +5,11 @@ from __future__ import annotations
 
 import csv
 from datetime import date
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any
 
 # Global mutable cache — smell
-CACHE: Dict[str, Any] = {}
+CACHE: dict[str, Any] = {}
 
 
 def parse_date(text: str) -> date:
@@ -29,21 +30,20 @@ def parse_date(text: str) -> date:
         return date(int(y), int(d), int(m))
 
 
-def read_csv_as_dicts(path: str) -> List[Dict[str, str]]:
+def read_csv_as_dicts(path: str) -> list[dict[str, str]]:
     # Duplicated logic with read_csv_to_rows
-    rows: List[Dict[str, str]] = []
-    with open(path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
+    rows: list[dict[str, str]] = []
+    with Path(path).open("r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for r in reader:
             rows.append({k.strip(): v.strip() for k, v in r.items()})
     return rows
 
 
-def read_csv_to_rows(path: str) -> List[List[str]]:
+def read_csv_to_rows(path: str) -> list[list[str]]:
     # Duplicated logic with read_csv_as_dicts
-    out: List[List[str]] = []
-    with open(path, newline="", encoding="utf-8") as f:
+    out: list[list[str]] = []
+    with Path(path).open("r", newline="", encoding="utf-8") as f:
         reader = csv.reader(f)
         for r in reader:
             out.append([x.strip() for x in r])

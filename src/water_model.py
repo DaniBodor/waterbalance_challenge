@@ -3,14 +3,15 @@
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, List
+import csv
+from pathlib import Path
+from typing import Any
 
 from .config import CONFIG
 from .utils import parse_date, read_csv_as_dicts
 
 # Mutable global state — smell
-STATE: Dict[str, Any] = {
+STATE: dict[str, Any] = {
     "last_q": 0.0,
     "rows": [],
 }
@@ -41,8 +42,6 @@ def mix_concentration_bad(q1: float, c1: float, q2: float, c2: float) -> float:
 
 
 # Huge function doing everything.
-# noqa: C901 (complexity) — this is legacy code on purpose
-
 def run_all():
     beta = CONFIG.get("beta", 0.9)
     fpath = CONFIG.get("paths", {}).get("forcing") or "data/forcing.csv"
@@ -51,7 +50,8 @@ def run_all():
     forcing = read_csv_as_dicts(fpath)
     reaches = read_csv_as_dicts(rpath)
     if len(reaches) < 2:
-        raise RuntimeError("need at least 2 reaches A and B")
+        msg = "need at least 2 reaches A and B"
+        raise RuntimeError(msg)
 
     # Assume reaches sorted A then B
     A = reaches[0]
@@ -63,7 +63,7 @@ def run_all():
     C_A = float(A.get("tracer_init_mgL", "0"))
     C_B = float(B.get("tracer_init_mgL", "0"))
 
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
 
     last_qA = 0.0
     last_qB = 0.0
@@ -92,9 +92,7 @@ def run_all():
         # BUG: wrong mixing formula
         C_A = mix_concentration_bad(q1=1.0, c1=upstream_c, q2=qA_local, c2=C_A)
 
-        results.append({
-            "date": d.isoformat(), "reach": "A", "q_m3s": qA, "c_mgL": C_A
-        })
+        results.append({"date": d.isoformat(), "reach": "A", "q_m3s": qA, "c_mgL": C_A})
 
         # Reach B receives Q from A and its own local input
         qB = qB_local + qA
@@ -102,9 +100,7 @@ def run_all():
         # BUG: wrong mixing (again)
         C_B = mix_concentration_bad(q1=qA, c1=C_A, q2=qB_local, c2=C_B)
 
-        results.append({
-            "date": d.isoformat(), "reach": "B", "q_m3s": qB, "c_mgL": C_B
-        })
+        results.append({"date": d.isoformat(), "reach": "B", "q_m3s": qB, "c_mgL": C_B})
 
         last_qA = qA
         last_qB = qB
@@ -114,11 +110,9 @@ def run_all():
 
 
 def write_output_csv(path: str) -> None:
-    import csv
-
     rows = STATE.get("rows") or []
     fieldnames = ["date", "reach", "q_m3s", "c_mgL"]
-    with open(path, "w", newline="", encoding="utf-8") as f:
+    with Path(path).open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
         for r in rows:

@@ -31,6 +31,4 @@ def test_mm_day_to_m3s_conversion_on_1km2_should_be_1_m3s():
     got = legacy.mm_day_to_m3s_bad(mm_per_day, area_km2)
 
     # Intentional failing assertion: legacy divides by area and misses /86400
-    assert math.isclose(got, expected, rel_tol=1e-12), (
-        "Legacy unit conversion mm/day -> m^3/s is incorrect"
-    )
+    assert math.isclose(got, expected, rel_tol=1e-12), "Legacy unit conversion mm/day -> m^3/s is incorrect"
