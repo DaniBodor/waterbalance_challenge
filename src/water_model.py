@@ -21,20 +21,16 @@ STATE: dict[str, Any] = {
 
 def convert_mm_day_to_m3_s(mm_per_day: float, area_km2: float) -> float:
     """Convert mm/day over area_km2 to m3/s."""
-    try:
-        return (mm_per_day / 1000.0) * (area_km2 * 1_000_000.0) / 86400.0
-    except ZeroDivisionError:
+    if area_km2 == 0:
         return 0.0
+    return (mm_per_day / 1000.0) * (area_km2 * 1_000_000.0) / 86400.0
 
 
-def mix_concentration_bad(q1: float, c1: float, q2: float, c2: float) -> float:
-    """WRONG mixing (intentional bug): simple average ignoring flows.
-    Correct should be flow-weighted: (q1*c1 + q2*c2)/(q1+q2) when q1+q2>0.
-    """
-    try:
-        return (c1 + c2) / 2.0
-    except Exception:
+def mix_concentration(q1: float, c1: float, q2: float, c2: float) -> float:
+    """Flow-weighted concetration mixing."""
+    if q1 + q2 <= 0:
         return float("nan")
+    return (q1 * c1 + q2 * c2) / (q1 + q2)
 
 
 # Huge function doing everything.
@@ -61,9 +57,6 @@ def run_all():
 
     results: list[dict[str, Any]] = []
 
-    last_qA = 0.0
-    last_qB = 0.0
-
     for row in forcing:
         try:
             d = parse_date(row.get("date", "1970-01-01"))
@@ -85,22 +78,19 @@ def run_all():
         qA = qA_local + last_qA * 0.0  # pointless last_qA (dead state) # BUG
 
         # Mix tracer in A: upstream boundary and local input
-        # BUG: wrong mixing formula
-        concentration_A = mix_concentration_bad(q1=1.0, c1=upstream_c, q2=qA_local, c2=concentration_A)
+        concentration_A = mix_concentration(q1=1.0, c1=upstream_c, q2=qA_local, c2=concentration_A)
 
         results.append({"date": d.isoformat(), "reach": "A", "q_m3s": qA, "c_mgL": concentration_A})
 
         # Reach B receives Q from A and its own local input
         qB = qB_local + qA
 
-        # BUG: wrong mixing (again)
-        concentration_B = mix_concentration_bad(q1=qA, c1=concentration_A, q2=qB_local, c2=concentration_B)
+        concentration_B = mix_concentration(q1=qA, c1=concentration_A, q2=qB_local, c2=concentration_B)
 
         results.append({"date": d.isoformat(), "reach": "B", "q_m3s": qB, "c_mgL": concentration_B})
 
         last_qA = qA
 
-    STATE["rows"] = results
     return results
 
 

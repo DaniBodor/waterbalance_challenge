@@ -14,7 +14,7 @@ def test_tracer_mixing_should_be_flow_weighted():
     q2, c2 = 3.0, 0.0
     expected = (q1 * c1 + q2 * c2) / (q1 + q2)  # 2.5 mg/L
 
-    got = legacy.mix_concentration_bad(q1, c1, q2, c2)
+    got = legacy.mix_concentration(q1, c1, q2, c2)
 
     # Intentional failing assertion: legacy uses simple average (5.0) which is wrong.
     assert math.isclose(got, expected, rel_tol=1e-9), (
