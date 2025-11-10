@@ -8,11 +8,10 @@ from datetime import date
 from pathlib import Path
 
 
-def parse_date(text: str) -> date:
-    """Fragile date parser.
+def parse_date(text: str) -> str:
+    """Date parser.
 
-    Expects 'YYYY-MM-DD' but tries to be 'smart' by swapping parts when it fails.
-    This can silently produce wrong dates (smell/bug).
+    Expects 'YYYY-MM-DD' or 'YYYY/MM/DD' which is converted back to 'YYYY-MM-DD'.
     """
     parts = text.strip().split("-")
     if len(parts) != 3:
@@ -20,10 +19,10 @@ def parse_date(text: str) -> date:
         parts = text.strip().split("/")
     y, m, d = parts  # may raise
     try:
-        return date(int(y), int(m), int(d))
-    except Exception:
-        # Try swapping day/month (wrong for most data here!)
-        return date(int(y), int(d), int(m))
+        return date(int(y), int(m), int(d)).isoformat()
+    except ValueError as e:
+        msg = f"Date not recognized. Expected date format: YYYY-MM-DD (e.g. 2020-12-31). Got: {text}."
+        raise ValueError(msg) from e
 
 
 def read_csv_as_dicts(path: str) -> list[dict[str, str]]:

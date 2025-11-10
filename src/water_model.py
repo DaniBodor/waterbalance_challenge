@@ -54,11 +54,7 @@ def run_all():
     results: list[dict[str, Any]] = []
 
     for row in forcing:
-        try:
-            d = parse_date(row.get("date", "1970-01-01"))
-        except Exception:
-            # ignore bad dates silently — smell
-            continue
+        date = parse_date(row.get("date", "1970-01-01"))
         P = float(row.get("precip_mm", "0"))
         ET = float(row.get("et_mm", "0"))
         upstream_c = float(row.get("tracer_upstream_mgL", "0"))
