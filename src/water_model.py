@@ -10,6 +10,8 @@ from typing import Any
 from .config import CONFIG
 from .utils import parse_date, read_csv_as_dicts
 
+# ruff: noqa: N806
+
 # Mutable global state — smell
 STATE: dict[str, Any] = {
     "last_q": 0.0,
@@ -48,14 +50,14 @@ def run_all():
         raise RuntimeError(msg)
 
     # Assume reaches sorted A then B
-    A = reaches[0]
-    B = reaches[1]
+    reach_A = reaches[0]
+    reach_B = reaches[1]
 
-    A_area = float(A.get("area_km2", "0"))
-    B_area = float(B.get("area_km2", "0"))
+    A_area = float(reach_A.get("area_km2", "0"))
+    B_area = float(reach_B.get("area_km2", "0"))
 
-    C_A = float(A.get("tracer_init_mgL", "0"))
-    C_B = float(B.get("tracer_init_mgL", "0"))
+    concentration_A = float(reach_A.get("tracer_init_mgL", "0"))
+    concentration_B = float(reach_B.get("tracer_init_mgL", "0"))
 
     results: list[dict[str, Any]] = []
 
@@ -75,29 +77,28 @@ def run_all():
         runoff_mm_A = max(P - ET, 0.0) + beta * 0.0  # baseflow rolled into beta (unclear)
         runoff_mm_B = max(P - ET, 0.0) + beta * 0.0
 
-        # BUG: wrong conversion
+        # q is discharge in m3/s
         qA_local = convert_mm_day_to_m3_s(runoff_mm_A, A_area)
         qB_local = convert_mm_day_to_m3_s(runoff_mm_B, B_area)
 
         # Reach A total discharge (no routing)
-        qA = qA_local + last_qA * 0.0  # pointless last_qA (dead state)
+        qA = qA_local + last_qA * 0.0  # pointless last_qA (dead state) # BUG
 
         # Mix tracer in A: upstream boundary and local input
         # BUG: wrong mixing formula
-        C_A = mix_concentration_bad(q1=1.0, c1=upstream_c, q2=qA_local, c2=C_A)
+        concentration_A = mix_concentration_bad(q1=1.0, c1=upstream_c, q2=qA_local, c2=concentration_A)
 
-        results.append({"date": d.isoformat(), "reach": "A", "q_m3s": qA, "c_mgL": C_A})
+        results.append({"date": d.isoformat(), "reach": "A", "q_m3s": qA, "c_mgL": concentration_A})
 
         # Reach B receives Q from A and its own local input
         qB = qB_local + qA
 
         # BUG: wrong mixing (again)
-        C_B = mix_concentration_bad(q1=qA, c1=C_A, q2=qB_local, c2=C_B)
+        concentration_B = mix_concentration_bad(q1=qA, c1=concentration_A, q2=qB_local, c2=concentration_B)
 
-        results.append({"date": d.isoformat(), "reach": "B", "q_m3s": qB, "c_mgL": C_B})
+        results.append({"date": d.isoformat(), "reach": "B", "q_m3s": qB, "c_mgL": concentration_B})
 
         last_qA = qA
-        last_qB = qB
 
     STATE["rows"] = results
     return results
