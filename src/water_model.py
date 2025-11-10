@@ -17,17 +17,11 @@ STATE: dict[str, Any] = {
 }
 
 
-def mm_day_to_m3s_bad(mm_per_day: float, area_km2: float) -> float:
-    """WRONG conversion (intentional bug): divides by area instead of multiplying
-    and forgets factor 86400.
-    Correct would be: (mm/1000) * (area_km2*1e6) / 86400
-    """
-    if area_km2 == 0:
-        return 0.0
+def convert_mm_day_to_m3_s(mm_per_day: float, area_km2: float) -> float:
+    """Convert mm/day over area_km2 to m3/s."""
     try:
-        # wrong: divide by area and no /86400
-        return (mm_per_day / 1000.0) / (area_km2 * 1_000_000.0)
-    except Exception:
+        return (mm_per_day / 1000.0) * (area_km2 * 1_000_000.0) / 86400.0
+    except ZeroDivisionError:
         return 0.0
 
 
@@ -82,8 +76,8 @@ def run_all():
         runoff_mm_B = max(P - ET, 0.0) + beta * 0.0
 
         # BUG: wrong conversion
-        qA_local = mm_day_to_m3s_bad(runoff_mm_A, A_area)
-        qB_local = mm_day_to_m3s_bad(runoff_mm_B, B_area)
+        qA_local = convert_mm_day_to_m3_s(runoff_mm_A, A_area)
+        qB_local = convert_mm_day_to_m3_s(runoff_mm_B, B_area)
 
         # Reach A total discharge (no routing)
         qA = qA_local + last_qA * 0.0  # pointless last_qA (dead state)
