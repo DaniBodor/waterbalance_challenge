@@ -20,9 +20,9 @@ def test_tracer_mixing_should_be_flow_weighted() -> None:
     got = water_model.mix_concentration(q1, c1, q2, c2)
 
     # Intentional failing assertion: legacy uses simple average (5.0) which is wrong.
-    assert math.isclose(got, expected, rel_tol=1e-9), (
-        "Legacy tracer mixing is incorrect; should be flow-weighted mass balance"
-    )
+    assert math.isclose(
+        got, expected, rel_tol=1e-9
+    ), "Legacy tracer mixing is incorrect; should be flow-weighted mass balance"
 
 
 def test_mm_day_to_m3s_conversion_on_1km2_should_be_1_m3s() -> None:
@@ -34,7 +34,9 @@ def test_mm_day_to_m3s_conversion_on_1km2_should_be_1_m3s() -> None:
     got = water_model.convert_mm_day_to_m3_s(mm_per_day, area_km2)
 
     # Intentional failing assertion: legacy divides by area and misses /86400
-    assert math.isclose(got, expected, rel_tol=1e-12), "Legacy unit conversion mm/day -> m^3/s is incorrect"
+    assert math.isclose(
+        got, expected, rel_tol=1e-12
+    ), "Legacy unit conversion mm/day -> m^3/s is incorrect"
 
 
 def test_write_output_csv_creates_file(tmp_path: Path) -> None:
