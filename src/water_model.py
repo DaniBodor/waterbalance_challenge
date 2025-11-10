@@ -40,9 +40,7 @@ class ReachData:
         self.tracer_concentration = float(reach_dict.get("tracer_init_mgL", "0"))
 
 
-def load_input_data(
-    forcing_path: str, reaches_path: str
-) -> tuple[list[dict[str, str]], list[ReachData]]:
+def load_input_data(forcing_path: str, reaches_path: str) -> tuple[list[dict[str, str]], list[ReachData]]:
     """Load forcing and reach data from CSV files.
 
     Args:
@@ -218,9 +216,7 @@ def run_simulation(
     return all_results
 
 
-def run_all(
-    forcing_path: str = FORCING_PATH, reaches_path: str = REACHES_PATH
-) -> list[dict[str, Any]]:
+def run_all(forcing_path: str = FORCING_PATH, reaches_path: str = REACHES_PATH) -> list[dict[str, Any]]:
     """Main entry point for running the water balance model.
 
     Loads configuration, reads input data, runs simulation, and returns results.
@@ -229,9 +225,7 @@ def run_all(
     return run_simulation(forcing, reaches)
 
 
-def write_output_csv(
-    rows: list[dict[str, Any]], output_path: str = OUTPUT_PATH
-) -> None:
+def write_output_csv(rows: list[dict[str, Any]], output_path: str = OUTPUT_PATH) -> None:
     """Write results to CSV file.
 
     Args:
@@ -246,7 +240,7 @@ def write_output_csv(
             w.writerow(r)
 
 
-def main():
+def main() -> None:
     out = OUTPUT_PATH
     rows = run_all()
     write_output_csv(rows, out)
