@@ -31,3 +31,11 @@ def test_mm_day_to_m3s_conversion_on_1km2_should_be_1_m3s() -> None:
 
     # Intentional failing assertion: legacy divides by area and misses /86400
     assert math.isclose(got, expected, rel_tol=1e-12), "Legacy unit conversion mm/day -> m^3/s is incorrect"
+
+
+def test_model_integration() -> None:
+    # Simple integration test to ensure model runs end-to-end without error
+    water_model.run_all(
+        forcing_path="data/forcing.csv",
+        reaches_path="data/reaches.csv",
+    )
