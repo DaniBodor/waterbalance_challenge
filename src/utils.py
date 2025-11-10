@@ -6,10 +6,6 @@ from __future__ import annotations
 import csv
 from datetime import date
 from pathlib import Path
-from typing import Any
-
-# Global mutable cache — smell
-CACHE: dict[str, Any] = {}
 
 
 def parse_date(text: str) -> date:

@@ -12,11 +12,7 @@ from .utils import parse_date, read_csv_as_dicts
 
 # ruff: noqa: N806
 
-# Mutable global state — smell
-STATE: dict[str, Any] = {
-    "last_q": 0.0,
-    "rows": [],
-}
+# AI-ASSIST: Remove the (mutable) global CONFIG from codebase.
 
 
 def convert_mm_day_to_m3_s(mm_per_day: float, area_km2: float) -> float:
@@ -94,8 +90,13 @@ def run_all():
     return results
 
 
-def write_output_csv(path: str) -> None:
-    rows = STATE.get("rows") or []
+def write_output_csv(path: str, rows: list[dict[str, Any]]) -> None:
+    """Write results to CSV file.
+
+    Args:
+        path: Output file path
+        rows: List of result dictionaries to write
+    """
     fieldnames = ["date", "reach", "q_m3s", "c_mgL"]
     with Path(path).open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
@@ -107,7 +108,7 @@ def write_output_csv(path: str) -> None:
 def main():
     out = CONFIG.get("paths", {}).get("output")
     rows = run_all()
-    write_output_csv(out)
+    write_output_csv(out, rows)
     print(f"Wrote {len(rows)} rows to {out}")
 
 
