@@ -40,7 +40,9 @@ class ReachData:
         self.tracer_concentration = float(reach_dict.get("tracer_init_mgL", "0"))
 
 
-def load_input_data(forcing_path: str, reaches_path: str) -> tuple[list[dict[str, str]], list[ReachData]]:
+def load_input_data(
+    forcing_path: str, reaches_path: str
+) -> tuple[list[dict[str, str]], list[ReachData]]:
     """Load forcing and reach data from CSV files.
 
     Args:

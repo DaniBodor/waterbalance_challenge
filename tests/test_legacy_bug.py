@@ -20,9 +20,9 @@ def test_tracer_mixing_should_be_flow_weighted():
     got = water_model.mix_concentration(q1, c1, q2, c2)
 
     # Intentional failing assertion: legacy uses simple average (5.0) which is wrong.
-    assert math.isclose(got, expected, rel_tol=1e-9), (
-        "Legacy tracer mixing is incorrect; should be flow-weighted mass balance"
-    )
+    assert math.isclose(
+        got, expected, rel_tol=1e-9
+    ), "Legacy tracer mixing is incorrect; should be flow-weighted mass balance"
 
 
 def test_mm_day_to_m3s_conversion_on_1km2_should_be_1_m3s():
@@ -34,12 +34,20 @@ def test_mm_day_to_m3s_conversion_on_1km2_should_be_1_m3s():
     got = water_model.convert_mm_day_to_m3_s(mm_per_day, area_km2)
 
     # Intentional failing assertion: legacy divides by area and misses /86400
-    assert math.isclose(got, expected, rel_tol=1e-12), "Legacy unit conversion mm/day -> m^3/s is incorrect"
+    assert math.isclose(
+        got, expected, rel_tol=1e-12
+    ), "Legacy unit conversion mm/day -> m^3/s is incorrect"
 
 
 def test_date_parser():
     valid_dates = ["2020-12-31", "1999/01/01", "2000-02-29"]
-    non_valid_dates = ["31-12-2020", "2020/31/12", "2020-13-01", "2020-00-10", "abcd-ef-gh"]
+    non_valid_dates = [
+        "31-12-2020",
+        "2020/31/12",
+        "2020-13-01",
+        "2020-00-10",
+        "abcd-ef-gh",
+    ]
 
     for d in valid_dates:
         # checks that valid dates are parsed without error and a string is returned
