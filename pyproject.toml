@@ -9,7 +9,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = []
 
 [tool.poetry]
-packages = [{ include = "legacy_code" }] # AI-ASSIST
+packages = [{ include = "src" }] # AI-ASSIST
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

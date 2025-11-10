@@ -2,11 +2,10 @@ from __future__ import annotations
 
 # Failing regression tests that capture real defects in legacy_code.
 # Candidates should fix the bugs during refactor and make these pass (or replace with equivalent tests on src/).
-
 import math
 
 # AI-ASSIST: Example marker to illustrate how to annotate AI-influenced code or tests.
-from legacy_code import water_model as legacy
+from src import water_model as legacy
 
 
 def test_tracer_mixing_should_be_flow_weighted():
