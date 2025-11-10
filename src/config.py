@@ -12,7 +12,7 @@ CONFIG = {
         # Hard-coded paths — smell
         "forcing": "data/forcing.csv",
         "reaches": "data/reaches.csv",
-        "output": "legacy_results.csv",
+        "output": "data/model_results.csv",
     },
     # Mixed casing and unclear keys — smell
     "TracerUnits": "mg/L",

@@ -105,8 +105,7 @@ def write_output_csv(path: str) -> None:
 
 
 def main():
-    # Hard-coded default path — smell
-    out = CONFIG.get("paths", {}).get("output", "legacy_results.csv")
+    out = CONFIG.get("paths", {}).get("output")
     rows = run_all()
     write_output_csv(out)
     print(f"Wrote {len(rows)} rows to {out}")
