@@ -69,19 +69,18 @@ def load_input_data(forcing_path: str, reaches_path: str) -> tuple[list[dict[str
     return forcing, reaches
 
 
-def calculate_runoff(precip_mm: float, et_mm: float, beta: float) -> float:
+def calculate_runoff(precip_mm: float, et_mm: float) -> float:
     """Calculate runoff in mm/day.
 
     Args:
         precip_mm: Precipitation in mm/day
         et_mm: Evapotranspiration in mm/day
-        beta: Recession/baseflow factor (currently unused but reserved for future)
 
     Returns:
         Runoff in mm/day
     """
-    # baseflow rolled into beta (unclear in legacy code)
-    return max(precip_mm - et_mm, 0.0) + beta * 0.0
+    # baseflow (beta) is not taken into account here.
+    return max(precip_mm - et_mm, 0.0)
 
 
 def process_reach_a(
@@ -161,7 +160,6 @@ def simulate_timestep(
     forcing_row: dict[str, str],
     reach_a: ReachData,
     reach_b: ReachData,
-    beta: float,
 ) -> list[dict[str, Any]]:
     """Simulate a single timestep for all reaches.
 
@@ -169,7 +167,6 @@ def simulate_timestep(
         forcing_row: Dictionary with forcing data for this timestep
         reach_a: ReachData object for reach A
         reach_b: ReachData object for reach B
-        beta: Recession/baseflow factor
 
     Returns:
         List of result dictionaries (one per reach)
@@ -179,7 +176,7 @@ def simulate_timestep(
     et_mm = float(forcing_row.get("et_mm", "0"))
     upstream_c = float(forcing_row.get("tracer_upstream_mgL", "0"))
 
-    runoff_mm = calculate_runoff(precip_mm, et_mm, beta)
+    runoff_mm = calculate_runoff(precip_mm, et_mm)
 
     # Process reach A
     result_a = process_reach_a(date, runoff_mm, reach_a, upstream_c)
@@ -199,14 +196,12 @@ def simulate_timestep(
 def run_simulation(
     forcing: list[dict[str, str]],
     reaches: list[ReachData],
-    beta: float,
 ) -> list[dict[str, Any]]:
     """Run the water balance simulation for all timesteps.
 
     Args:
         forcing: List of forcing data dictionaries
         reaches: List of ReachData objects
-        beta: Recession/baseflow factor
 
     Returns:
         List of result dictionaries for all reaches and timesteps
@@ -215,7 +210,7 @@ def run_simulation(
     all_results: list[dict[str, Any]] = []
 
     for row in forcing:
-        timestep_results = simulate_timestep(row, reach_a, reach_b, beta)
+        timestep_results = simulate_timestep(row, reach_a, reach_b)
         all_results.extend(timestep_results)
 
     return all_results
@@ -226,12 +221,11 @@ def run_all():
 
     Loads configuration, reads input data, runs simulation, and returns results.
     """
-    beta = CONFIG.get("beta", 0.9)
     forcing_path = CONFIG.get("paths", {}).get("forcing") or "data/forcing.csv"
     reaches_path = CONFIG.get("paths", {}).get("reaches") or "data/reaches.csv"
 
     forcing, reaches = load_input_data(forcing_path, reaches_path)
-    return run_simulation(forcing, reaches, beta)
+    return run_simulation(forcing, reaches)
 
 
 def write_output_csv(path: str, rows: list[dict[str, Any]]) -> None:
