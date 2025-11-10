@@ -8,7 +8,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from .config import CONFIG
+from .config import FORCING_PATH, MM_DAY_TO_M3_S, OUTPUT_PATH, REACHES_PATH
 from .utils import parse_date, read_csv_as_dicts
 
 # AI-ASSIST: Remove the (mutable) global CONFIG from codebase.
@@ -20,7 +20,7 @@ def convert_mm_day_to_m3_s(mm_per_day: float, area_km2: float) -> float:
     """Convert mm/day over area_km2 to m3/s."""
     if area_km2 == 0:
         return 0.0
-    return (mm_per_day / 1000.0) * (area_km2 * 1_000_000.0) / 86400.0
+    return mm_per_day * area_km2 * MM_DAY_TO_M3_S
 
 
 def mix_concentration(q1: float, c1: float, q2: float, c2: float) -> float:
@@ -40,9 +40,7 @@ class ReachData:
         self.tracer_concentration = float(reach_dict.get("tracer_init_mgL", "0"))
 
 
-def load_input_data(
-    forcing_path: str, reaches_path: str
-) -> tuple[list[dict[str, str]], list[ReachData]]:
+def load_input_data(forcing_path: str, reaches_path: str) -> tuple[list[dict[str, str]], list[ReachData]]:
     """Load forcing and reach data from CSV files.
 
     Args:
@@ -218,37 +216,34 @@ def run_simulation(
     return all_results
 
 
-def run_all():
+def run_all(forcing_path: str = FORCING_PATH, reaches_path: str = REACHES_PATH) -> list[dict[str, Any]]:
     """Main entry point for running the water balance model.
 
     Loads configuration, reads input data, runs simulation, and returns results.
     """
-    forcing_path = CONFIG.get("paths", {}).get("forcing") or "data/forcing.csv"
-    reaches_path = CONFIG.get("paths", {}).get("reaches") or "data/reaches.csv"
-
     forcing, reaches = load_input_data(forcing_path, reaches_path)
     return run_simulation(forcing, reaches)
 
 
-def write_output_csv(path: str, rows: list[dict[str, Any]]) -> None:
+def write_output_csv(rows: list[dict[str, Any]], output_path: str = OUTPUT_PATH) -> None:
     """Write results to CSV file.
 
     Args:
-        path: Output file path
         rows: List of result dictionaries to write
+        output_path: Output file path
     """
     fieldnames = ["date", "reach", "q_m3s", "c_mgL"]
-    with Path(path).open("w", newline="", encoding="utf-8") as f:
+    with Path(output_path).open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
         for r in rows:
             w.writerow(r)
 
 
-def main():
-    out = CONFIG.get("paths", {}).get("output")
+def main() -> None:
+    out = OUTPUT_PATH
     rows = run_all()
-    write_output_csv(out, rows)
+    write_output_csv(rows, out)
     logger.info("Wrote %d rows to %s", len(rows), out)
 
 
